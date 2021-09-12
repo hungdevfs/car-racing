@@ -40,6 +40,10 @@ Config.countDocuments({}, async (err, count) => {
     }
 })
 
+// cron jobs
+const { checkRefCronJob } = require("./services/cron.service")
+checkRefCronJob()
+
 // routers
 const router = require("./routes")
 app.use("/api", router)

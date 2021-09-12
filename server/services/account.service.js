@@ -32,8 +32,7 @@ const logIn = async ({ email, password }) => {
 
     await activationService.add({
         userId: user._id,
-        type: ACTIVATION_TYPES.LOGIN,
-        createdAt: Date.now()
+        type: ACTIVATION_TYPES.LOGIN
     })
 
     return { data, accessToken }
@@ -104,8 +103,7 @@ const confirmSignUp = async (pendingSignUpRequestId) => {
 
     await activationService.add({
         userId: newUser._id,
-        type: ACTIVATION_TYPES.SIGNUP_CONFIRM,
-        createdAt: Date.now()
+        type: ACTIVATION_TYPES.SIGNUP_CONFIRM
     })
 }
 
@@ -125,8 +123,7 @@ const forgotPassword = async (email) => {
 
         await activationService.add({
             userId: user._id,
-            type: ACTIVATION_TYPES.FORGOT_PASSWORD_REQUEST,
-            createdAt: Date.now()
+            type: ACTIVATION_TYPES.FORGOT_PASSWORD_REQUEST
         })
     }
 }
@@ -148,9 +145,35 @@ const confirmForgotPassword = async ({ token, newPassword }) => {
     await user.save()
     await activationService.add({
         userId: user._id,
-        type: ACTIVATION_TYPES.FORGOT_PASSWORD_CONFIRM,
-        createdAt: Date.now()
+        type: ACTIVATION_TYPES.FORGOT_PASSWORD_CONFIRM
     })
+}
+
+const checkRef = async () => {
+    const notRefCheckedUsers = await User.find({ refChecked: false, refFrom: { $ne: "" } })
+    if (!notRefCheckedUsers || !notRefCheckedUsers.length) return
+
+    const config = await Config.findOne({})
+    for (const notRefCheckedUser of notRefCheckedUsers) {
+        const refUser = await User.findOne({ refCode: notRefCheckedUser.refFrom })
+        if (!refUser) continue
+        if (refUser.totalRef >= config.maxRefAllowed) continue;
+
+        refUser.amount += config.refAmount
+        await refUser.save()
+
+        activationService.add({
+            userId: refUser._id,
+            type: ACTIVATION_TYPES.GET_FUND_FROM_REF,
+            content: JSON.stringify({
+                userId: notRefCheckedUser._id,
+                amount: config.refAmount
+            })
+        })
+
+        notRefCheckedUser.refChecked = true
+        await notRefCheckedUser.save()
+    }
 }
 
 module.exports = {
@@ -159,5 +182,6 @@ module.exports = {
     signUp,
     confirmSignUp,
     forgotPassword,
-    confirmForgotPassword
+    confirmForgotPassword,
+    checkRef
 }

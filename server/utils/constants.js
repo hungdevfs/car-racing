@@ -6,7 +6,8 @@ const ACTIVATION_TYPES = {
     LOGIN: "LogIn",
     SIGNUP_CONFIRM: "SignUpConfirm",
     FORGOT_PASSWORD_REQUEST: "ForgotPasswordRequest",
-    FORGOT_PASSWORD_CONFIRM: "ForgotPasswordConfirm"
+    FORGOT_PASSWORD_CONFIRM: "ForgotPasswordConfirm",
+    GET_FUND_FROM_REF: "GetFundFromRef"
 }
 
 module.exports = {
