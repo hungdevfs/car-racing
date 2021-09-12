@@ -31,5 +31,15 @@ connection.once("open", () =>
     console.log("MongoDB database connected successfully!")
 )
 
+// init configs
+const { Config } = require("./models")
+Config.countDocuments({}, async (err, count) => {
+    if (!count) {
+        const config = new Config({})
+        await config.save()
+    }
+})
+
+// routers
 const router = require("./routes")
 app.use("/api", router)

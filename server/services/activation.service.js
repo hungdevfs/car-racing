@@ -8,8 +8,6 @@ const add = async ({ userId, type, content }) => {
         createdAt: Date.now()
     })
 
-    console.log({newActivation})
-
     await newActivation.save()
 }
 

@@ -98,8 +98,6 @@ const confirmSignUp = async (pendingSignUpRequestId) => {
         (request) => request._id !== pendingSignUpRequestId,
     )
 
-    console.log({newUser})
-
     await activationService.add({
         userId: newUser._id,
         type: ACTIVATION_TYPES.SIGNUP_CONFIRM,
