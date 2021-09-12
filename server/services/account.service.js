@@ -10,7 +10,7 @@ const {
 
 const { ACTIVATION_TYPES } = constants
 
-const { User } = require("../models")
+const { User, Config } = require("../models")
 const activationService = require("./activation.service")
 
 const logIn = async ({ email, password }) => {
@@ -86,10 +86,14 @@ const confirmSignUp = async (pendingSignUpRequestId) => {
         (request) => request._id === pendingSignUpRequestId,
     )
     if (!pendingSignUpRequest) throw new Error("Invalid request")
+
+    const config = await Config.findOne({})
+
     const newUser = new User({
         ...pendingSignUpRequest.data,
         refCode: nanoid(8),
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        amount: config.initAmount
     })
 
     await newUser.save()
