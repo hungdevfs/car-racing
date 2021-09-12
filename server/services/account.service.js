@@ -3,11 +3,15 @@ const passwordHash = require("password-hash")
 const { nanoid } = require('nanoid')
 
 const {
+    constants,
     mail,
     validations,
 } = require("../utils")
 
+const { ACTIVATION_TYPES } = constants
+
 const { User } = require("../models")
+const activationService = require("./activation.service")
 
 const logIn = async ({ email, password }) => {
     const user = await User.findOne({ email }).lean()
@@ -24,6 +28,12 @@ const logIn = async ({ email, password }) => {
 
     const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET_KEY, {
         expiresIn: process.env.JWT_ACCESS_TOKEN_LIFE,
+    })
+
+    await activationService.add({
+        userId: user._id,
+        type: ACTIVATION_TYPES.LOGIN,
+        createdAt: Date.now()
     })
 
     return { data, accessToken }
@@ -87,6 +97,14 @@ const confirmSignUp = async (pendingSignUpRequestId) => {
     pendingSignUpRequests = pendingSignUpRequests.filter(
         (request) => request._id !== pendingSignUpRequestId,
     )
+
+    console.log({newUser})
+
+    await activationService.add({
+        userId: newUser._id,
+        type: ACTIVATION_TYPES.SIGNUP_CONFIRM,
+        createdAt: Date.now()
+    })
 }
 
 let pendingForgotPasswordRequests = []
@@ -102,6 +120,12 @@ const forgotPassword = async (email) => {
             token
         })
         await mail.sendForgotPasswordEmail(email, token)
+
+        await activationService.add({
+            userId: user._id,
+            type: ACTIVATION_TYPES.FORGOT_PASSWORD_REQUEST,
+            createdAt: Date.now()
+        })
     }
 }
 
@@ -120,6 +144,11 @@ const confirmForgotPassword = async ({ token, newPassword }) => {
     user.password = passwordHash.generate(newPassword)
 
     await user.save()
+    await activationService.add({
+        userId: user._id,
+        type: ACTIVATION_TYPES.FORGOT_PASSWORD_CONFIRM,
+        createdAt: Date.now()
+    })
 }
 
 module.exports = {
