@@ -6,7 +6,7 @@ const mongoose = require("mongoose")
 require("dotenv").config()
 
 const app = express()
-
+app.use(express.static(__dirname + "/static"));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
