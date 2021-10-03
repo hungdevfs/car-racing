@@ -10,7 +10,7 @@ app.use(express.static(__dirname + "/static"));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use(cors())
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
 
 app.listen(process.env.PORT, () => {
     console.log(`Your app is listening on port ${process.env.PORT}`)

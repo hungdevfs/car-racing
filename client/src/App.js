@@ -1,23 +1,27 @@
 import logo from './logo.svg';
 import './App.css';
 
+import axios from "axios"
+
 function App() {
+  const login = async () => {
+    const res = await axios.post(
+      "http://localhost:8888/api/v1/account/login", 
+      {
+        email: "jack.brightsoft@gmail.com",
+        password: "Asdfgh1@3"
+      },
+      {
+        withCredentials: true
+      }
+    )
+
+    console.log(res.data)
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <button onClick={login}>Login</button>
     </div>
   );
 }

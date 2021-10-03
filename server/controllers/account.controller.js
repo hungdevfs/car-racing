@@ -5,7 +5,16 @@ const logIn = async (req, res) => {
     try {
         const { email, password } = req.body
         const data = await accountService.logIn({ email, password })
-        res.status(200).json(data)
+        res.cookie(
+          'ACCESS_TOKEN', 
+          data.accessToken, 
+          { 
+            httpOnly: true, 
+            secure: true, 
+            expires: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000) 
+          }
+        )
+        res.status(200).json(data.data)
     } catch (err) {
         res.status(400).send(err.message)
     }
